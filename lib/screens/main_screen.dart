@@ -1,76 +1,93 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:rick_and_morty_app/characters/characters_bloc.dart';
+import 'package:rick_and_morty_app/hive/hive_service.dart';
+import 'package:rick_and_morty_app/widgets/character_item.dart';
+import 'package:rick_and_morty_app/widgets/navigation_bar.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<StatefulWidget> createState() => MainScreenState();
+}
+
+class MainScreenState extends State<MainScreen> {
+  final HiveService hiveService = HiveService();
+
+  bool _isLoadingMore = false;
+
+  void _loadMore() {
+    if (!_isLoadingMore) {
+      _isLoadingMore = true;
+      print('🔄 Загрузка следующей страницы...');
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CharactersBloc()..add(ButtonSubmit()),
+      create: (context) => CharactersBloc()..add(LoadCharacters()),
       child: Builder(
         builder: (context) => Scaffold(
           backgroundColor: const Color.fromARGB(255, 20, 20, 20),
-          appBar: AppBar(backgroundColor: Colors.lightBlueAccent),
-          bottomNavigationBar: BottomNavigationBar(
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home, color: Colors.black),
-                label: "Главная",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.abc, color: Colors.black),
-                label: "Избранное",
-              ),
-            ],
+          appBar: AppBar(
             backgroundColor: Colors.lightBlueAccent,
-            unselectedItemColor: Colors.black,
-            fixedColor: Color.fromARGB(255, 0, 0, 0),
-            currentIndex: 1,
+            title: const Text(
+              "Персонажи",
+              style: TextStyle(color: Colors.black),
+            ),
+            automaticallyImplyLeading: false,
           ),
+          bottomNavigationBar: NavigationBarWidget(currentIndex: 0),
           body: Center(
-            child: BlocBuilder<CharactersBloc, CharactersState>(
+            child: BlocBuilder<CharactersBloc, AppState>(
               builder: (context, state) {
-                return state.charactersList.isNotEmpty
-                    ? ListView.builder(
-                        padding: EdgeInsets.only(top: 18.0),
-                        itemCount: state.charactersList.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: EdgeInsets.only(top: 8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
-                                  child: Image.network(
-                                    state.charactersList[index]["image"],
-                                    width: 96.0,
-                                  ),
-                                ),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      state.charactersList[index]["name"],
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      )
-                    : CircularProgressIndicator(color: Colors.black);
+                if (state is LoadedCharactersState) {
+                  return LazyLoadScrollView(
+                    onEndOfPage: () {
+                      context.read<CharactersBloc>().add(
+                        LoadNextPage(
+                          page: (state.charactersList.length / 20).round() + 1,
+                        ),
+                      );
+                    },
+                    isLoading: _isLoadingMore,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.only(top: 18.0),
+                      itemCount: state.charactersList.length,
+                      itemBuilder: (context, index) {
+                        return CharacterItem(
+                          characterName:
+                              state.charactersList[index].characterName,
+                          characterImage:
+                              state.charactersList[index].characterImage,
+                          isFavorite: state.charactersList[index].isFavorite,
+                          characterKey: state.charactersList[index].key,
+                        );
+                      },
+                    ),
+                  );
+                } else if (state is LoadedErrorState) {
+                  return const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.network_check, color: Colors.red),
+                      Text(
+                        'Check internet connection...',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  );
+                } else {
+                  return const CircularProgressIndicator(color: Colors.white);
+                }
               },
             ),
           ),
