@@ -9,20 +9,9 @@ class HiveService {
     await box.clear();
   }
 
-  Future<void> replaceCharacters(List<Character> newList) async {
-    final box = Hive.box<Character>('characters');
-    final existingKeys = box.keys.toSet();
-    for (int i = 0; i < newList.length; i++) {
-      final char = newList[i];
-      if (i < existingKeys.length) {
-        await box.put(i, char);
-      } else {
-        await box.add(char);
-      }
-    }
-    // Удаление излишков, если newList меньше прежнего размера:
-    for (final key in existingKeys.difference(Set.from(List.generate(newList.length, (i) => i)))) {
-      await box.delete(key);
+  Future<void> addNewCharacters(List<Character> newCharacters) async {
+    for (var character in newCharacters) {
+      await box.add(character);
     }
   }
 
@@ -43,8 +32,14 @@ class HiveService {
     return box.isEmpty;
   }
 
-  Future<void> updateCharacter(int characterKey) async {
-    final character = box.get(characterKey);
+  Future<void> updateCharacter(String characterName) async {
+    final characterBox = box.values;
+
+    // Ищем персонажа по имени
+    final character = characterBox.firstWhere(
+      (char) => char.characterName == characterName,
+    );
+
     if (character != null) {
       character.isFavorite = !character.isFavorite;
       await character.save();
