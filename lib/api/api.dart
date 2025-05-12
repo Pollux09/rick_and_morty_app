@@ -5,9 +5,12 @@ class APIUtil {
   final baseUrl = "https://rickandmortyapi.com/api";
 
   Future<List?> getCharacters([int page = 1]) async {
-    final result = await dio.get("$baseUrl/character/?page=$page");
+    String url = "$baseUrl/character/?page=$page";
+    if (page == 1) {
+      url = "$baseUrl/character";
+    }
+    var result = await dio.get(url);
     final List charactersList = result.data["results"] as List;
-    print(charactersList);
     return charactersList;
   }
 }
