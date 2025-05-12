@@ -7,14 +7,14 @@ class LoadCharacters extends CharactersEvent {}
 class LoadFavoriteCharacters extends CharactersEvent {}
 
 class ToFavorite extends CharactersEvent {
-  final dynamic characterKey;
-  ToFavorite(this.characterKey);
+  final dynamic characterName;
+  ToFavorite(this.characterName);
 }
 
 class DeleteFavoriteCharacter extends CharactersEvent {
-  final int characterKey;
+  final dynamic characterName;
   
-  DeleteFavoriteCharacter({required this.characterKey});
+  DeleteFavoriteCharacter({required this.characterName});
 }
 
 class LoadNextPage extends CharactersEvent {
