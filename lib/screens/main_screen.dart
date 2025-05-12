@@ -17,7 +17,6 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   final HiveService hiveService = HiveService();
-
   bool _isLoadingMore = false;
 
   void _loadMore() {
@@ -45,7 +44,16 @@ class MainScreenState extends State<MainScreen> {
           ),
           bottomNavigationBar: NavigationBarWidget(currentIndex: 0),
           body: Center(
-            child: BlocBuilder<CharactersBloc, AppState>(
+            child: BlocConsumer<CharactersBloc, AppState>(
+              listener: (context, state) {
+                if (state is LoadedCharactersState || state is LoadedErrorState) {
+                  if (_isLoadingMore) {
+                    setState(() {
+                      _isLoadingMore = false;
+                    });
+                  }
+                }
+              },
               builder: (context, state) {
                 if (state is LoadedCharactersState) {
                   return LazyLoadScrollView(
@@ -61,8 +69,7 @@ class MainScreenState extends State<MainScreen> {
                     child: ListView.builder(
                       padding: const EdgeInsets.only(top: 18.0),
                       itemCount:
-                          state.charactersList.length +
-                          (_isLoadingMore ? 1 : 0),
+                          state.charactersList.length + (_isLoadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == state.charactersList.length &&
                             _isLoadingMore) {
