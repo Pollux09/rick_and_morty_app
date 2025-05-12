@@ -102,7 +102,7 @@ class CharactersBloc extends Bloc<CharactersEvent, AppState> {
   }
 
   Future<void> _saveCharactersToHive(List<Character> characters) async {
-    HiveService().replaceCharacters(characters);
+    HiveService().addNewCharacters(characters);
   }
 
   // Добавление персонажа в избранные
