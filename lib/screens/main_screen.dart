@@ -22,10 +22,8 @@ class MainScreenState extends State<MainScreen> {
 
   void _loadMore() {
     if (!_isLoadingMore) {
-      _isLoadingMore = true;
-      print('🔄 Загрузка следующей страницы...');
       setState(() {
-        _isLoadingMore = false;
+        _isLoadingMore = true;
       });
     }
   }
@@ -57,17 +55,32 @@ class MainScreenState extends State<MainScreen> {
                           page: (state.charactersList.length / 20).round() + 1,
                         ),
                       );
+                      _loadMore();
                     },
                     isLoading: _isLoadingMore,
                     child: ListView.builder(
                       padding: const EdgeInsets.only(top: 18.0),
-                      itemCount: state.charactersList.length,
+                      itemCount:
+                          state.charactersList.length +
+                          (_isLoadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
+                        if (index == state.charactersList.length &&
+                            _isLoadingMore) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24.0),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        }
                         return CharacterItem(
                           characterName:
                               state.charactersList[index].characterName,
                           characterImage:
                               state.charactersList[index].characterImage,
+                          gender: state.charactersList[index].gender,
                           isFavorite: state.charactersList[index].isFavorite,
                           characterKey: state.charactersList[index].key,
                         );
