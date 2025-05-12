@@ -47,6 +47,7 @@ class FavoritesScreen extends StatelessWidget {
                             state.favoriteCharacters[index].characterName,
                         characterImage:
                             state.favoriteCharacters[index].characterImage,
+                        gender: state.favoriteCharacters[index].gender,
                         isFavorite: state.favoriteCharacters[index].isFavorite,
                         characterKey: state.favoriteCharacters[index].key,
                       );
