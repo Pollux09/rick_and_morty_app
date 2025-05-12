@@ -12,19 +12,25 @@ class Character extends HiveObject {
   @HiveField(1)
   final Uint8List characterImage;
 
-  @HiveField(2, defaultValue: false)
+  @HiveField(2)
+  final String gender;
+
+  @HiveField(3, defaultValue: false)
   bool isFavorite;
 
-  Character(this.characterName, this.characterImage, {this.isFavorite = false});
+
+  Character(this.characterName, this.characterImage, this.gender, {this.isFavorite = false});
 
   Character copyWith({
     String? characterName,
     Uint8List? characterImage,
+    String? gender,
     bool? isFavorite,
   }) {
     return Character(
       characterName ?? this.characterName,
       characterImage ?? this.characterImage,
+      gender ?? this.gender,
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }

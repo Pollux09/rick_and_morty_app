@@ -19,19 +19,22 @@ class CharacterAdapter extends TypeAdapter<Character> {
     return Character(
       fields[0] as String,
       fields[1] as Uint8List,
-      isFavorite: fields[2] == null ? false : fields[2] as bool,
+      fields[2] as String,
+      isFavorite: fields[3] == null ? false : fields[3] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, Character obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.characterName)
       ..writeByte(1)
       ..write(obj.characterImage)
       ..writeByte(2)
+      ..write(obj.gender)
+      ..writeByte(3)
       ..write(obj.isFavorite);
   }
 
